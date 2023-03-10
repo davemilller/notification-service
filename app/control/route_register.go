@@ -1,7 +1,6 @@
 package control
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -9,12 +8,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func Routes(mc *Controller) []func(r *mux.Router) {
-	return []func(r *mux.Router){func(r *mux.Router) {
+func Routes(mc *Controller) func(r *mux.Router) {
+	return func(r *mux.Router) {
 		RegisterRoutes(mc, r)
-	}, func(r *mux.Router) {
-		RegisterNoAuthRoutes(mc, r)
-	}}
+	}
 }
 
 func RegisterRoutes(mc *Controller, r *mux.Router) {
@@ -42,15 +39,4 @@ func RegisterRoutes(mc *Controller, r *mux.Router) {
 	}
 
 	r.HandleFunc("/graphql", wrapHandler).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
-
-	// rest endpoints go here
-}
-
-func RegisterNoAuthRoutes(mc *Controller, r *mux.Router) {
-	zap.S().Info("registering unauthorized routes")
-
-	// add healthcheck
-	r.Handle("/healthcheck", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "health check ok\n")
-	})).Methods(http.MethodGet)
 }

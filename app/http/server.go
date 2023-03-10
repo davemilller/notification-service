@@ -14,11 +14,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// ListenAndServeDebug runs an HTTP debug pprof server.
-func ListenAndServeDebug() error {
-	return http.ListenAndServe(":6060", nil)
-}
-
 type Server struct {
 	server          *http.Server
 	router          *mux.Router

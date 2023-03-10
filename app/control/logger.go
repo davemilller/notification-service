@@ -22,7 +22,7 @@ func NewLogger() *zap.SugaredLogger {
 
 	encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	encoderConfig.EncodeTime = zapcore.TimeEncoder(func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-		enc.AppendString(fmt.Sprintf("%s |", t.Format(domain.TimeFormatLog)))
+		enc.AppendString(fmt.Sprintf("%s |", t.Format(domain.TimeFormat)))
 	})
 	encoderConfig.EncodeCaller = zapcore.CallerEncoder(func(ec zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 		enc.AppendString(fmt.Sprintf(" | %s |", ec.TrimmedPath()))
