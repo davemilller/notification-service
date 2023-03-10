@@ -3,14 +3,11 @@ services:
   notification-service:
     build:
       context: "../../"
-      dockerfile: docker/local/Dockerfile
+      dockerfile: config/docker/Dockerfile
     env_file:
       - .env
-      - local_secrets.env
     ports:
       - "8080:8080"
-    volumes:
-      - "$HOME/.config/gcloud/application_default_credentials.json:/gcp/creds.json"
     depends_on:
       migrate:
         condition: service_started

@@ -15,7 +15,7 @@ func Routes(mc *Controller) func(r *mux.Router) {
 }
 
 func RegisterRoutes(mc *Controller, r *mux.Router) {
-	zap.S().Info("registering authorized routes")
+	zap.S().Info("registering routes")
 
 	// graphql setup
 	gqlSchema, err := GenSchema(mc.gc)

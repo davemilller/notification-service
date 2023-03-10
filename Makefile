@@ -1,6 +1,6 @@
 COMPOSE_NAME = notification-service
 
-LOCAL_COMPOSE_FILE ?= deploy/local/docker-compose.yaml
+LOCAL_COMPOSE_FILE ?= config/local/docker-compose.yaml
 LOCAL_PROJECT_NAME := $(COMPOSE_NAME)-local
 
 .PHONY: build
