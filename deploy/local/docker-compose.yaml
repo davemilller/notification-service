@@ -1,0 +1,47 @@
+version: "3.3"
+services:
+  notification-service:
+    build:
+      context: "../../"
+      dockerfile: docker/local/Dockerfile
+    env_file:
+      - .env
+      - local_secrets.env
+    ports:
+      - "8080:8080"
+    volumes:
+      - "$HOME/.config/gcloud/application_default_credentials.json:/gcp/creds.json"
+    depends_on:
+      migrate:
+        condition: service_started
+      postgres:
+        condition: service_started
+
+  migrate:
+    image: migrate/migrate
+    volumes:
+        - ../migrations:/migrations
+    command: ["-path", "/migrations", "-database",  "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "up"]
+    depends_on:
+      postgres:
+          condition: service_healthy
+
+  postgres:
+      image: postgres:13
+      restart: unless-stopped
+      environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+      logging:
+        options:
+          max-size: 10m
+          max-file: "3"
+      healthcheck:
+        test: pg_isready -U postgres -d postgres
+        interval: 10s
+        timeout: 3s
+        retries: 5
+      ports:
+        - '5438:5432'
+      volumes: 
+        - ./${POSTGRES_DATA}:/var/lib/postgresql/data
