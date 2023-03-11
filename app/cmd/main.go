@@ -24,7 +24,7 @@ func main() {
 		fx.Provide(
 			LoadConfig,
 			context.Background,
-			repo.NewPostgesql,
+			repo.NewRedis,
 			control.NewController,
 			control.Routes,
 			http.NewServer,

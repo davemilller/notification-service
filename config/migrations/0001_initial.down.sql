@@ -1,3 +1,0 @@
---
--- Database schema down migration
---

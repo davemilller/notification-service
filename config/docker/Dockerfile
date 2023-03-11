@@ -1,8 +1,6 @@
 # build stage
 FROM golang:1.17-buster as builder
 
-# define ags below `FROM` command for them to be available
-
 WORKDIR /app
 
 COPY app/go.* /app

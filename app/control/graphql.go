@@ -1,14 +1,18 @@
 package control
 
 import (
+	"github.com/go-redis/redis"
 	"github.com/graphql-go/graphql"
 )
 
 type GQLController struct {
+	db *redis.Client
 }
 
-func NewGQLController() (*GQLController, error) {
-	return &GQLController{}, nil
+func NewGQLController(db *redis.Client) (*GQLController, error) {
+	return &GQLController{
+		db: db,
+	}, nil
 }
 
 func GenSchema(gc *GQLController) (*graphql.Schema, error) {
