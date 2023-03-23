@@ -25,6 +25,12 @@ func main() {
 			LoadConfig,
 			context.Background,
 			repo.NewRedis,
+
+			fx.Annotate(
+				repo.NewNotificationRepo,
+				fx.As(new(control.NotificationService)),
+			),
+
 			control.NewController,
 			control.Routes,
 			http.NewServer,
