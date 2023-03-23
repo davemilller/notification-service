@@ -3,7 +3,7 @@ package domain
 import "time"
 
 type Notification struct {
-	ID        int
-	Details   string
-	CreatedAt time.Time
+	ID        int       `json:"id"`
+	Details   string    `json:"details"`
+	CreatedAt time.Time `json:"timestamp"`
 }

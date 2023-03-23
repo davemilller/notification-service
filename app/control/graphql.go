@@ -18,8 +18,9 @@ func NewGQLController(db *redis.Client) (*GQLController, error) {
 func GenSchema(gc *GQLController) (*graphql.Schema, error) {
 	// build schema
 	schema, err := graphql.NewSchema(graphql.SchemaConfig{
-		Query:    gc.Query(),
-		Mutation: gc.Mutation(),
+		Query:        gc.Query(),
+		Mutation:     gc.Mutation(),
+		Subscription: gc.Subscription(),
 	})
 	if err != nil {
 		return nil, err
@@ -57,6 +58,27 @@ func (gc *GQLController) Mutation() *graphql.Object {
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					return "check!", nil
 				},
+			},
+		},
+	}
+
+	return graphql.NewObject(cfg)
+}
+
+// Subscriptions ---------------
+
+func (gc *GQLController) Subscription() *graphql.Object {
+	cfg := graphql.ObjectConfig{
+		Name: "Subscription",
+		Fields: graphql.Fields{
+			"notifications": &graphql.Field{
+				Type: NotificationGraph,
+				Args: graphql.FieldConfigArgument{
+					"userID": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+				},
+				Resolve: gc.HandleNotifications,
 			},
 		},
 	}
