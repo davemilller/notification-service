@@ -3,7 +3,8 @@ package repo
 import (
 	"context"
 	"fmt"
-	"notification-service/domain"
+
+	"github.com/davemilller/notification-service/domain"
 
 	"github.com/go-redis/redis"
 )

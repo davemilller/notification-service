@@ -1,9 +1,10 @@
 package control
 
 import (
-	"notification-service/domain"
 	"strconv"
 	"time"
+
+	"github.com/davemilller/notification-service/domain"
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"

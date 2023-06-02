@@ -3,6 +3,7 @@ package control
 import (
 	"net/http"
 
+	"github.com/functionalfoundry/graphqlws"
 	"github.com/gorilla/mux"
 	"github.com/graphql-go/handler"
 	"go.uber.org/zap"
@@ -23,6 +24,14 @@ func RegisterRoutes(mc *Controller, r *mux.Router) {
 		zap.S().Fatal("gqlschema: ", err)
 	}
 
+	mc.gc.Subs = graphqlws.NewSubscriptionManager(gqlSchema)
+	subHandler := graphqlws.NewHandler(graphqlws.HandlerConfig{
+		SubscriptionManager: mc.gc.Subs,
+		Authenticate: func(token string) (interface{}, error) {
+			return token, nil
+		},
+	})
+
 	h := handler.New(&handler.Config{
 		Schema:     gqlSchema,
 		Pretty:     true,
@@ -39,4 +48,5 @@ func RegisterRoutes(mc *Controller, r *mux.Router) {
 	}
 
 	r.HandleFunc("/graphql", wrapHandler).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
+	r.Handle("/subscriptions", subHandler)
 }

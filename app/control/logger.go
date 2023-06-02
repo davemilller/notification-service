@@ -2,9 +2,10 @@ package control
 
 import (
 	"fmt"
-	"notification-service/domain"
 	"os"
 	"time"
+
+	"github.com/davemilller/notification-service/domain"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

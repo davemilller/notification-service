@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"notification-service/control"
-	"notification-service/framework/repo"
-	"notification-service/http"
+
+	"github.com/davemilller/notification-service/control"
+	"github.com/davemilller/notification-service/framework/repo"
+	"github.com/davemilller/notification-service/http"
 
 	env "github.com/Netflix/go-env"
 	_ "github.com/lib/pq"

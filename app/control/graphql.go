@@ -1,11 +1,13 @@
 package control
 
 import (
+	"github.com/functionalfoundry/graphqlws"
 	"github.com/graphql-go/graphql"
 )
 
 type GQLController struct {
-	db NotificationService
+	db   NotificationService
+	Subs graphqlws.SubscriptionManager
 }
 
 func NewGQLController(db NotificationService) (*GQLController, error) {
@@ -58,6 +60,18 @@ func (gc *GQLController) Mutation() *graphql.Object {
 					return "check!", nil
 				},
 			},
+			"addNote": &graphql.Field{
+				Type: NotificationGraph,
+				Args: graphql.FieldConfigArgument{
+					"userID": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+					"details": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+				},
+				Resolve: gc.AddNote,
+			},
 		},
 	}
 
@@ -71,7 +85,7 @@ func (gc *GQLController) Subscription() *graphql.Object {
 		Name: "Subscription",
 		Fields: graphql.Fields{
 			"notifications": &graphql.Field{
-				Type: NotificationGraph,
+				Type: graphql.NewList(NotificationGraph),
 				Args: graphql.FieldConfigArgument{
 					"userID": &graphql.ArgumentConfig{
 						Type: graphql.String,

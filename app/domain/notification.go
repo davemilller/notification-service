@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type Notifications map[int][]Notification
 
@@ -9,4 +12,8 @@ type Notification struct {
 	UserID    string    `json:"userID"`
 	Details   string    `json:"details"`
 	CreatedAt time.Time `json:"timestamp"`
+}
+
+func (n Notification) MarshalBinary() ([]byte, error) {
+	return json.Marshal(n)
 }
