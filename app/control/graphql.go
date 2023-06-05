@@ -1,13 +1,12 @@
 package control
 
 import (
-	"github.com/functionalfoundry/graphqlws"
 	"github.com/graphql-go/graphql"
 )
 
 type GQLController struct {
 	db   NotificationService
-	Subs graphqlws.SubscriptionManager
+	subs SubscriberService
 }
 
 func NewGQLController(db NotificationService) (*GQLController, error) {
@@ -91,7 +90,10 @@ func (gc *GQLController) Subscription() *graphql.Object {
 						Type: graphql.String,
 					},
 				},
-				Resolve: gc.HandleNotifications,
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					return p.Source, nil
+				},
+				Subscribe: gc.HandleNotifications,
 			},
 		},
 	}

@@ -2,11 +2,15 @@ package control
 
 import (
 	"net/http"
+	"time"
 
-	"github.com/functionalfoundry/graphqlws"
 	"github.com/gorilla/mux"
 	"github.com/graphql-go/handler"
 	"go.uber.org/zap"
+
+	"github.com/eientei/wsgraphql/v1"
+	"github.com/eientei/wsgraphql/v1/compat/gorillaws"
+	"github.com/gorilla/websocket"
 )
 
 func Routes(mc *Controller) func(r *mux.Router) {
@@ -24,18 +28,26 @@ func RegisterRoutes(mc *Controller, r *mux.Router) {
 		zap.S().Fatal("gqlschema: ", err)
 	}
 
-	mc.gc.Subs = graphqlws.NewSubscriptionManager(gqlSchema)
-	subHandler := graphqlws.NewHandler(graphqlws.HandlerConfig{
-		SubscriptionManager: mc.gc.Subs,
-		Authenticate: func(token string) (interface{}, error) {
-			return token, nil
-		},
-	})
+	subHandler, err := wsgraphql.NewServer(
+		*gqlSchema,
+		wsgraphql.WithKeepalive(time.Second*30),
+		wsgraphql.WithConnectTimeout(time.Second*30),
+		wsgraphql.WithUpgrader(gorillaws.Wrap(&websocket.Upgrader{
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+			Subprotocols: []string{
+				wsgraphql.WebsocketSubprotocolGraphqlWS.String(),
+				wsgraphql.WebsocketSubprotocolGraphqlTransportWS.String(),
+			},
+		})),
+	)
+	if err != nil {
+		panic(err)
+	}
 
 	h := handler.New(&handler.Config{
-		Schema:     gqlSchema,
-		Pretty:     true,
-		Playground: true,
+		Schema: gqlSchema,
+		Pretty: true,
 	})
 
 	wrapHandler := func(w http.ResponseWriter, r *http.Request) {

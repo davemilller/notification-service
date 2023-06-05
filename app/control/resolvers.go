@@ -10,23 +10,34 @@ import (
 )
 
 func (gc *GQLController) HandleNotifications(p graphql.ResolveParams) (interface{}, error) {
-	userID, ok := p.Args["userID"].(string)
-	if !ok {
-		return nil, fmt.Errorf("invalid userID arg")
-	}
+	zap.S().Infof("sub resolver")
+	// userID, ok := p.Args["userID"].(string)
+	// if !ok {
+	// 	return nil, fmt.Errorf("invalid userID arg")
+	// }
+
+	userID := "Yo Mama"
 
 	zap.S().Infof("hit subscription for userID: %s", userID)
 
+	// add subscriber
+	err := gc.subs.AddSubscriber(p.Context, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// get notifications
 	notes, err := gc.db.Get(p.Context, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	subs := gc.Subs.Subscriptions()
-	zap.S().Infof("subs: %+v", subs)
-	for conn, sub := range subs {
-		zap.S().Infof("conn: %+v", conn)
-		zap.S().Infof("sub: %+v", sub)
+	// push em
+	for _, note := range notes {
+		err := gc.subs.Push(userID, note)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return notes, nil

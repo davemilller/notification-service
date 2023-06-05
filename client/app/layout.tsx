@@ -1,6 +1,7 @@
 "use client";
 
 import { WebSocketLink } from "@apollo/client/link/ws";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
 import "./globals.css";
 import {
@@ -18,9 +19,9 @@ const httpLink = new HttpLink({
 
 const wsLink =
   typeof window !== "undefined"
-    ? new WebSocketLink({
-        uri: "ws://localhost:8080/api/v1/subscriptions",
-      })
+    ? new GraphQLWsLink(
+        createClient({ url: "ws://localhost:8080/api/v1/subscriptions" })
+      )
     : null;
 
 const splitLink =
