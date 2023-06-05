@@ -7,7 +7,7 @@ var NotificationGraph = graphql.NewObject(
 		Name: "notification",
 		Fields: graphql.Fields{
 			"id": &graphql.Field{
-				Type: graphql.Int,
+				Type: graphql.String,
 			},
 			"userID": &graphql.Field{
 				Type: graphql.String,

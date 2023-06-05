@@ -19,6 +19,6 @@ type NotificationService interface {
 var _ SubscriberService = &subscriptions.SubscriptionManager{}
 
 type SubscriberService interface {
-	AddSubscriber(ctx context.Context, userID string) error
-	Push(userID string, note interface{}) error
+	AddSubscriber(ctx context.Context, userID string) (*domain.Subscriber, error)
+	Push(userID string, note domain.Notification) error
 }

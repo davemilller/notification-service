@@ -3,25 +3,20 @@ package subscriptions
 import (
 	"context"
 
+	"github.com/davemilller/notification-service/domain"
 	"go.uber.org/zap"
 )
 
-type Subscriber struct {
-	Ctx          context.Context
-	Subscription chan interface{}
-	ID           string
-}
-
 type SubscriptionManager struct {
-	Subs   map[string]*Subscriber
-	Add    chan *Subscriber
+	Subs   map[string]*domain.Subscriber
+	Add    chan *domain.Subscriber
 	Remove chan string
 }
 
 func NewSubscriptionManager() *SubscriptionManager {
 	sm := &SubscriptionManager{
-		Subs:   make(map[string]*Subscriber),
-		Add:    make(chan *Subscriber, 1),
+		Subs:   make(map[string]*domain.Subscriber),
+		Add:    make(chan *domain.Subscriber, 1),
 		Remove: make(chan string, 1),
 	}
 
@@ -44,19 +39,21 @@ func NewSubscriptionManager() *SubscriptionManager {
 	return sm
 }
 
-func (sm *SubscriptionManager) AddSubscriber(ctx context.Context, userID string) error {
-	if _, ok := sm.Subs[userID]; ok {
+func (sm *SubscriptionManager) AddSubscriber(ctx context.Context, userID string) (*domain.Subscriber, error) {
+	if s, ok := sm.Subs[userID]; ok {
 		zap.S().Infof("subscriber already exists: %s", userID)
-		return nil
+		return s, nil
 	}
 
 	ch := make(chan interface{}, 1)
 
-	sm.Add <- &Subscriber{
+	sub := &domain.Subscriber{
 		Ctx:          ctx,
 		Subscription: ch,
 		ID:           userID,
 	}
+
+	sm.Add <- sub
 
 	go func() {
 		<-ctx.Done()
@@ -64,16 +61,20 @@ func (sm *SubscriptionManager) AddSubscriber(ctx context.Context, userID string)
 		sm.Remove <- userID
 	}()
 
-	return nil
+	return sub, nil
 }
 
-func (sm *SubscriptionManager) Push(userID string, note interface{}) error {
+func (sm *SubscriptionManager) Push(userID string, note domain.Notification) error {
+	zap.S().Infof("pushing notification %+v to subscriber: %s", note, userID)
 	if _, ok := sm.Subs[userID]; !ok {
 		zap.S().Infof("subscriber does not exist: %s", userID)
 		return nil
 	}
 
-	sm.Subs[userID].Subscription <- note
+	select {
+	case <-sm.Subs[userID].Ctx.Done():
+	case sm.Subs[userID].Subscription <- note:
+	}
 
 	return nil
 }

@@ -35,6 +35,9 @@ func RegisterRoutes(mc *Controller, r *mux.Router) {
 		wsgraphql.WithUpgrader(gorillaws.Wrap(&websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
 			Subprotocols: []string{
 				wsgraphql.WebsocketSubprotocolGraphqlWS.String(),
 				wsgraphql.WebsocketSubprotocolGraphqlTransportWS.String(),

@@ -5,6 +5,7 @@ import (
 
 	"github.com/davemilller/notification-service/control"
 	"github.com/davemilller/notification-service/framework/repo"
+	"github.com/davemilller/notification-service/framework/subscriptions"
 	"github.com/davemilller/notification-service/http"
 
 	env "github.com/Netflix/go-env"
@@ -30,6 +31,10 @@ func main() {
 			fx.Annotate(
 				repo.NewNotificationRepo,
 				fx.As(new(control.NotificationService)),
+			),
+			fx.Annotate(
+				subscriptions.NewSubscriptionManager,
+				fx.As(new(control.SubscriberService)),
 			),
 
 			control.NewController,

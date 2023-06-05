@@ -2,6 +2,7 @@ package control
 
 import (
 	"github.com/graphql-go/graphql"
+	"go.uber.org/zap"
 )
 
 type GQLController struct {
@@ -9,9 +10,10 @@ type GQLController struct {
 	subs SubscriberService
 }
 
-func NewGQLController(db NotificationService) (*GQLController, error) {
+func NewGQLController(db NotificationService, subs SubscriberService) (*GQLController, error) {
 	return &GQLController{
-		db: db,
+		db:   db,
+		subs: subs,
 	}, nil
 }
 
@@ -84,16 +86,18 @@ func (gc *GQLController) Subscription() *graphql.Object {
 		Name: "Subscription",
 		Fields: graphql.Fields{
 			"notifications": &graphql.Field{
-				Type: graphql.NewList(NotificationGraph),
+				Type: NotificationGraph,
 				Args: graphql.FieldConfigArgument{
 					"userID": &graphql.ArgumentConfig{
 						Type: graphql.String,
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					zap.S().Infof("sub resolver")
+					zap.S().Infof("p.Source: %+v", p.Source)
 					return p.Source, nil
 				},
-				Subscribe: gc.HandleNotifications,
+				Subscribe: gc.AddSubscriber,
 			},
 		},
 	}

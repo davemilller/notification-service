@@ -2,26 +2,26 @@ package control
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/davemilller/notification-service/domain"
+	"github.com/google/uuid"
 
 	"github.com/graphql-go/graphql"
 	"go.uber.org/zap"
 )
 
-func (gc *GQLController) HandleNotifications(p graphql.ResolveParams) (interface{}, error) {
-	zap.S().Infof("sub resolver")
-	// userID, ok := p.Args["userID"].(string)
-	// if !ok {
-	// 	return nil, fmt.Errorf("invalid userID arg")
-	// }
-
-	userID := "Yo Mama"
+func (gc *GQLController) AddSubscriber(p graphql.ResolveParams) (interface{}, error) {
+	zap.S().Infof("add sub resolver")
+	userID, ok := p.Args["userID"].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid userID arg")
+	}
 
 	zap.S().Infof("hit subscription for userID: %s", userID)
 
 	// add subscriber
-	err := gc.subs.AddSubscriber(p.Context, userID)
+	sub, err := gc.subs.AddSubscriber(p.Context, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (gc *GQLController) HandleNotifications(p graphql.ResolveParams) (interface
 		}
 	}
 
-	return notes, nil
+	return sub.Subscription, nil
 }
 
 func (gc *GQLController) AddNote(p graphql.ResolveParams) (interface{}, error) {
@@ -55,11 +55,18 @@ func (gc *GQLController) AddNote(p graphql.ResolveParams) (interface{}, error) {
 	}
 
 	note := &domain.Notification{
-		UserID:  userID,
-		Details: details,
+		ID:        uuid.New().String(),
+		UserID:    userID,
+		Details:   details,
+		CreatedAt: time.Now().Round(time.Microsecond).UTC(),
 	}
 
 	err := gc.db.Push(p.Context, note)
+	if err != nil {
+		return nil, err
+	}
+
+	err = gc.subs.Push(userID, *note)
 	if err != nil {
 		return nil, err
 	}

@@ -2,9 +2,12 @@ package repo
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/davemilller/notification-service/domain"
+	"go.uber.org/zap"
 
 	"github.com/go-redis/redis"
 )
@@ -28,9 +31,14 @@ func (r *NotificationRepo) Push(ctx context.Context, note *domain.Notification) 
 		return fmt.Errorf("note is missing userID")
 	}
 
-	err := r.db.LPush(note.UserID, note)
-	if err.Err() != nil {
-		return err.Err()
+	jsonNote, err := json.Marshal(note)
+	if err != nil {
+		return fmt.Errorf("marshalling note: %w", err)
+	}
+
+	redisErr := r.db.LPush(note.UserID, string(jsonNote))
+	if redisErr.Err() != nil {
+		return redisErr.Err()
 	}
 
 	return nil
@@ -41,13 +49,27 @@ func (r *NotificationRepo) Get(ctx context.Context, userID string) ([]domain.Not
 		return nil, fmt.Errorf("missing userID")
 	}
 
-	var notes []domain.Notification
-	err := r.db.Get(userID).Scan(&notes)
+	notes, err := r.db.LRange(userID, 0, -1).Result()
+	if errors.Is(err, redis.Nil) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
 
-	return notes, nil
+	var notifications []domain.Notification
+	for _, note := range notes {
+		var n domain.Notification
+		err := json.Unmarshal([]byte(note), &n)
+		if err != nil {
+			return nil, err
+		}
+		notifications = append(notifications, n)
+	}
+
+	zap.S().Infof("got notes: %+v", notifications)
+
+	return notifications, nil
 }
 
 func (r *NotificationRepo) Ack(ctx context.Context, id int) error {
