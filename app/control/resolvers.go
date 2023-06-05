@@ -26,19 +26,19 @@ func (gc *GQLController) AddSubscriber(p graphql.ResolveParams) (interface{}, er
 		return nil, err
 	}
 
-	// get notifications
-	notes, err := gc.db.Get(p.Context, userID)
-	if err != nil {
-		return nil, err
-	}
+	// // get notifications
+	// notes, err := gc.db.Get(p.Context, userID)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	// push em
-	for _, note := range notes {
-		err := gc.subs.Push(userID, note)
-		if err != nil {
-			return nil, err
-		}
-	}
+	// // push em
+	// for _, note := range notes {
+	// 	err := gc.subs.Push(userID, note)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
 	return sub.Subscription, nil
 }

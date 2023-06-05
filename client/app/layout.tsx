@@ -1,9 +1,7 @@
 "use client";
 
-import { WebSocketLink } from "@apollo/client/link/ws";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
-import "./globals.css";
 import {
   ApolloClient,
   ApolloProvider,

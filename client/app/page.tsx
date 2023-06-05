@@ -27,8 +27,15 @@ export default function Home() {
   }, [data, userID]);
 
   return (
-    <div>
-      <h1>Notes</h1>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "10px",
+      }}
+    >
+      <h1>Notes for user: {userID}</h1>
       <div style={{ display: "flex", flexDirection: "column" }}>
         {notes.map((note) => (
           <Note key={note.id} note={note} />
