@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSubscription } from "@apollo/client";
-import { NOTIFICATIONS_SUBSCRIPTION } from "@/api";
-import Note from "./components/Note";
+import { useQuery, useSubscription } from "@apollo/client";
+import { GET_NOTIFICATIONS, NOTIFICATIONS_SUBSCRIPTION } from "@/api";
+import Notification from "./components/Note";
+import Notifications from "./components/Notifications";
 
 export default function Home() {
   const [userID, setUserID] = useState("0");
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [notes, setNotes] = useState<Notification[]>([]);
 
-  const { data, error } = useSubscription(NOTIFICATIONS_SUBSCRIPTION, {
+  const { subscribeToMore, data, error } = useQuery(GET_NOTIFICATIONS, {
     variables: {
       userID: userID,
     },
@@ -22,25 +23,25 @@ export default function Home() {
 
   useEffect(() => {
     if (data) {
-      setNotes((notes) => [...notes, data.notifications]);
+      setNotes(data.getNotes);
     }
   }, [data, userID]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "10px",
+    <Notifications
+      userID={userID}
+      notes={...notes}
+      subscribe={() => {
+        subscribeToMore({
+          document: NOTIFICATIONS_SUBSCRIPTION,
+          variables: { userID: userID },
+          updateQuery: (prev, { subscriptionData }) => {
+            if (!subscriptionData.data) return prev;
+            const newNote = subscriptionData.data.notifications;
+            setNotes((notes) => [newNote, ...notes]);
+          },
+        });
       }}
-    >
-      <h1>Notes for user: {userID}</h1>
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        {notes.map((note) => (
-          <Note key={note.id} note={note} />
-        ))}
-      </div>
-    </div>
+    />
   );
 }

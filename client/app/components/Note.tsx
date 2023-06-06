@@ -1,11 +1,11 @@
-import { Note } from "@/types";
+import { Note as Notification } from "@/types";
 import React from "react";
 
 interface Props {
-  note: Note;
+  note: Notification;
 }
 
-function Note({ note }: Props) {
+function Notification({ note }: Props) {
   return (
     <div>
       <h3>{note.details}</h3>
@@ -14,4 +14,4 @@ function Note({ note }: Props) {
   );
 }
 
-export default Note;
+export default Notification;

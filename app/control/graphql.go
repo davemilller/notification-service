@@ -43,6 +43,15 @@ func (gc *GQLController) Query() *graphql.Object {
 					return "check!", nil
 				},
 			},
+			"getNotes": &graphql.Field{
+				Type: graphql.NewList(NotificationGraph),
+				Args: graphql.FieldConfigArgument{
+					"userID": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+				},
+				Resolve: gc.GetNotes,
+			},
 		},
 	}
 

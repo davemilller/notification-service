@@ -42,11 +42,10 @@ func NewSubscriptionManager() *SubscriptionManager {
 func (sm *SubscriptionManager) AddSubscriber(ctx context.Context, userID string) (*domain.Subscriber, error) {
 	if s, ok := sm.Subs[userID]; ok {
 		zap.S().Infof("subscriber already exists: %s", userID)
-		s.Ctx = ctx
 		return s, nil
 	}
 
-	ch := make(chan interface{}, 5)
+	ch := make(chan interface{}, 1)
 
 	sub := &domain.Subscriber{
 		Ctx:          ctx,

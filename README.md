@@ -30,7 +30,19 @@ Thanks to [this](https://github.com/eientei/wsgraphql) websocket implementation,
 
 The idea is that a client can load the frontend, make a websocket connection (using a unique identifier), and get pushed real time messages.
 
-1. The client initializes the connection using this graphql request.
+1. The client queries for outstanding messages.
+```graphql
+query GetNotes($userID: String!) {
+  getNotes(userID: $userID) {
+    id
+    userID
+    details
+    timestamp
+  }
+}
+```
+
+2. The client initializes a subscription connection using this graphql and apollo's `subscribeToMore`.
 ```graphql
 subscription Notifications($userID: String!) {
   notifications(userID: $userID) {
@@ -41,8 +53,19 @@ subscription Notifications($userID: String!) {
   }
 }
 ```
+```js
+subscribeToMore({
+  document: NOTIFICATIONS_SUBSCRIPTION,
+  variables: { userID: userID },
+  updateQuery: (prev, { subscriptionData }) => {
+    if (!subscriptionData.data) return prev;
+    const newNote = subscriptionData.data.notifications;
+    setNotes((notes) => [newNote, ...notes]);
+  },
+});
+```
 
-2. Notifications are added to a user's queue using this graphql request. If there is a live connection for this user, the message is pushed to the websocket, otherwise it is cached in a redis db and all outstanding messages are pushed when the user connects.
+3. Notifications are added to a user's queue using this graphql request. If there is a live connection for this user, the message is pushed to the websocket, otherwise it is cached in a redis db and all outstanding messages are pushed when the user connects.
 ```graphql
 mutation AddNote($userID: String, $details: String) {
     addNote(userID: $userID, details: $details) {
@@ -54,7 +77,7 @@ mutation AddNote($userID: String, $details: String) {
 }
 ```
 
-3. Messages are ack'd out of the user's queue as they are delivered. An alternative to this would be to save them to a database for audit purposes or have the user manually ack them with a button.
+4. Messages are ack'd out of the user's queue as they are delivered. An alternative to this would be to save them to a database for audit purposes or have the user manually ack them with a button.
 
 ### Future work
 * Make a nice UI

@@ -26,20 +26,6 @@ func (gc *GQLController) AddSubscriber(p graphql.ResolveParams) (interface{}, er
 		return nil, err
 	}
 
-	// // get notifications
-	// notes, err := gc.db.Get(p.Context, userID)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// // push em
-	// for _, note := range notes {
-	// 	err := gc.subs.Push(userID, note)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// }
-
 	return sub.Subscription, nil
 }
 
@@ -72,4 +58,18 @@ func (gc *GQLController) AddNote(p graphql.ResolveParams) (interface{}, error) {
 	}
 
 	return note, nil
+}
+
+func (gc *GQLController) GetNotes(p graphql.ResolveParams) (interface{}, error) {
+	userID, ok := p.Args["userID"].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid userID arg")
+	}
+
+	notes, err := gc.db.Get(p.Context, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return notes, nil
 }
