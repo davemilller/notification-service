@@ -7,6 +7,13 @@ import (
 	"go.uber.org/zap"
 )
 
+/*
+SubscriptionManager manages subcriptions for users
+
+	Subs: map[userID]Subscription
+	Add: channel to add a new subscriber
+	Remove: channel to remove a subscriber
+*/
 type SubscriptionManager struct {
 	Subs   map[string]*domain.Subscriber
 	Add    chan *domain.Subscriber
@@ -20,6 +27,7 @@ func NewSubscriptionManager() *SubscriptionManager {
 		Remove: make(chan string, 1),
 	}
 
+	// run a routine to listen on the add and remove channels and handle accordingly
 	go func() {
 		for {
 			select {
@@ -55,6 +63,7 @@ func (sm *SubscriptionManager) AddSubscriber(ctx context.Context, userID string)
 
 	sm.Add <- sub
 
+	// run a routine to listen on the context and remove the subscriber when it's done
 	go func() {
 		<-ctx.Done()
 

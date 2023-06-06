@@ -2,7 +2,6 @@ package control
 
 import (
 	"github.com/graphql-go/graphql"
-	"go.uber.org/zap"
 )
 
 type GQLController struct {
@@ -102,8 +101,7 @@ func (gc *GQLController) Subscription() *graphql.Object {
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					zap.S().Infof("sub resolver")
-					zap.S().Infof("p.Source: %+v", p.Source)
+					// this returns any values pushed to the channel
 					return p.Source, nil
 				},
 				Subscribe: gc.AddSubscriber,

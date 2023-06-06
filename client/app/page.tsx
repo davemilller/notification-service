@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery, useSubscription } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { GET_NOTIFICATIONS, NOTIFICATIONS_SUBSCRIPTION } from "@/api";
 import Notification from "./components/Note";
 import Notifications from "./components/Notifications";

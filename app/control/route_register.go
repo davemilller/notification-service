@@ -28,6 +28,7 @@ func RegisterRoutes(mc *Controller, r *mux.Router) {
 		zap.S().Fatal("gqlschema: ", err)
 	}
 
+	// subscriptions / websocket handler
 	subHandler, err := wsgraphql.NewServer(
 		*gqlSchema,
 		wsgraphql.WithKeepalive(time.Second*30),
@@ -48,6 +49,7 @@ func RegisterRoutes(mc *Controller, r *mux.Router) {
 		panic(err)
 	}
 
+	// graphql handler
 	h := handler.New(&handler.Config{
 		Schema: gqlSchema,
 		Pretty: true,

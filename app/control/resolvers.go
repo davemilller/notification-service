@@ -12,7 +12,6 @@ import (
 )
 
 func (gc *GQLController) AddSubscriber(p graphql.ResolveParams) (interface{}, error) {
-	zap.S().Infof("add sub resolver")
 	userID, ok := p.Args["userID"].(string)
 	if !ok {
 		return nil, fmt.Errorf("invalid userID arg")
